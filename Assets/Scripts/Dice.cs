@@ -42,10 +42,13 @@ public class Dice : MonoBehaviour
         {
             if (transform.parent == gameManager.currentSavedGroup.transform) // Only unsave if it's from this turn
             {
-                transform.SetParent(GameObject.Find("PlayableDice").transform, true);
+                transform.SetParent(playableDiceParent, true);
                 transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
                 isSaved = false;
 
+                // Deduct score when die is removed
+                gameManager.turnScore -= gameManager.CalculateDiceScore(new int[] { GetDiceValue() });
+                gameManager.UpdateScoreBoard();
                 Debug.Log(gameObject.name + " moved back to PlayableDice");
 
                 // Check if any dice are still saved, if none, disable rolling
@@ -59,6 +62,7 @@ public class Dice : MonoBehaviour
                     }
                 }
                 gameManager.hasSaved = anySaved;
+                gameManager.UpdateTurnScore();
             }
         }
         else // If the die is not saved, move it to the current round's saved dice group
@@ -70,10 +74,11 @@ public class Dice : MonoBehaviour
             Debug.Log(gameObject.name + " moved to RoundSDice");
 
             gameManager.hasSaved = true; // A die has been saved, allow rolling again
+            gameManager.UpdateTurnScore();
         }
 
         // Update turn score after saving or unsaving a die
-        gameManager.UpdateTurnScore();
+        //gameManager.UpdateTurnScore();
     }
 
 

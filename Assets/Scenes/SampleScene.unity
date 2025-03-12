@@ -1156,7 +1156,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Turn Score:'
+  m_Text: 'Turn Score: 0'
 --- !u!222 &951727135
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1211,7 +1211,10 @@ MonoBehaviour:
   roll: {fileID: 1167362081}
   currentSavedGroup: {fileID: 0}
   turnScoreText: {fileID: 951727134}
-  totalScoreText: {fileID: 951727134}
+  totalScoreText: {fileID: 1525714331}
+  turnScore: 0
+  totalScore: 0
+  turnNumber: 0
   hasSaved: 1
   hasRolled: 0
 --- !u!4 &1064063002
@@ -1596,7 +1599,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Total Score: '
+  m_Text: 'Total Score: 0'
 --- !u!222 &1525714332
 CanvasRenderer:
   m_ObjectHideFlags: 0
