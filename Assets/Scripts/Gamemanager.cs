@@ -120,6 +120,7 @@ public class Gamemanager : MonoBehaviour
         totalScore += turnScore;
         turnScore = 0;
 
+
         List<Transform> diceToMove = new List<Transform>();
 
         // Collect all dice first
@@ -144,9 +145,16 @@ public class Gamemanager : MonoBehaviour
                 dice.position = ogPositions[dice];
             }
             
-        }        
+        }
 
-        CreateNewSavedGroup();
+        Transform RoundSaved = GameObject.Find("RoundSDice").transform;
+
+        foreach (Transform turn in RoundSaved)
+        {
+            Destroy(turn.gameObject);
+        }
+
+        //CreateNewSavedGroup();
         UpdateScoreBoard();
         throwDice();
     }
@@ -161,15 +169,12 @@ public class Gamemanager : MonoBehaviour
     {
         List<int> savedDiceValues = new List<int>();
 
-        Transform RoundSaved = GameObject.Find("RoundSDice").transform;
-
-        // Collect all saved dice values
-        foreach (Transform roundGroup in RoundSaved)
+        //make sure this works as intended
+        Transform RoundSaved = GameObject.Find("RoundSDice").transform.Find("SavedDice Turn" +turnNumber);
+        
+        foreach (Transform dice in RoundSaved)
         {
-            foreach (Transform dice in roundGroup)
-            {
-                savedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
-            }
+            savedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
         }
 
         // **Recalculate turnScore from scratch**
@@ -178,11 +183,6 @@ public class Gamemanager : MonoBehaviour
         UpdateScoreBoard();
         Debug.Log("Turn Score Updated: " + turnScore);
     }
-
-
-
-
-
 
     public int CalculateDiceScore(int[] diceValues)
     {
