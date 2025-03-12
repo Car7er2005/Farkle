@@ -16,7 +16,7 @@ public class Gamemanager : MonoBehaviour
 
     public Text turnScoreText, totalScoreText;
     
-    private int turnScore, totalScore, turnNumber;
+    public int turnScore, totalScore, turnNumber;
     public bool hasSaved = true, hasRolled = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -52,6 +52,12 @@ public class Gamemanager : MonoBehaviour
         hasRolled = true;
 
         // Move previous round's saved dice to the left and make them smaller
+        float startX = -7; // Left side
+        float startY = 3;  // Start stacking down from here
+        float yOffset = -0.5f; // Space between dice
+
+        int savedDiceCount = 0; // Track how many dice have been moved
+
         foreach (Transform group in GameObject.Find("RoundSDice").transform)
         {
             if (group != currentSavedGroup) // Ignore the current round's saved dice
@@ -59,10 +65,12 @@ public class Gamemanager : MonoBehaviour
                 foreach (Transform dice in group)
                 {
                     dice.localScale = new Vector3(0.1f, 0.1f, 1); // Shrink size
-                    dice.position = new Vector3(-7 + group.GetSiblingIndex(), -3, dice.position.z); // Move left
+                    dice.position = new Vector3(startX, startY + savedDiceCount * yOffset, dice.position.z);
+                    savedDiceCount++;
                 }
             }
         }
+
 
         CreateNewSavedGroup();
         Transform playableDiceParent = GameObject.Find("PlayableDice")?.transform;
@@ -79,7 +87,7 @@ public class Gamemanager : MonoBehaviour
 
         foreach (Transform dice in playableDiceParent)
         {
-            float yOffset = (Random.Range(-5, 15) * 0.1f % 1.5f) + 1;
+            yOffset = (Random.Range(-5, 15) * 0.1f % 1.5f) + 1;
             dice.position = new Vector3(dice.position.x, yOffset, dice.position.z);
 
             int randDie = Random.Range(0, diceImages.Length);
@@ -99,6 +107,7 @@ public class Gamemanager : MonoBehaviour
         {
             Debug.Log("Farkle! No scoring dice.");
             turnScore = 0;
+            Bank();
             UpdateScoreBoard();
         }
 
@@ -154,7 +163,7 @@ public class Gamemanager : MonoBehaviour
 
         Transform RoundSaved = GameObject.Find("RoundSDice").transform;
 
-        // Loop through all round-based saved dice groups
+        // Collect all saved dice values
         foreach (Transform roundGroup in RoundSaved)
         {
             foreach (Transform dice in roundGroup)
@@ -163,12 +172,15 @@ public class Gamemanager : MonoBehaviour
             }
         }
 
-        // Recalculate turnScore from scratch to avoid duplicate additions
+        // **Recalculate turnScore from scratch**
         turnScore = CalculateDiceScore(savedDiceValues.ToArray());
 
         UpdateScoreBoard();
         Debug.Log("Turn Score Updated: " + turnScore);
     }
+
+
+
 
 
 
