@@ -62,6 +62,7 @@ public class Dice : MonoBehaviour
                     }
                 }
                 gameManager.hasSaved = anySaved;
+                gameManager.addDice = false;
                 gameManager.UpdateTurnScore();
             }
         }
@@ -74,11 +75,9 @@ public class Dice : MonoBehaviour
             Debug.Log(gameObject.name + " moved to RoundSDice");
 
             gameManager.hasSaved = true; // A die has been saved, allow rolling again
+            gameManager.addDice = true;
             gameManager.UpdateTurnScore();
         }
-
-        // Update turn score after saving or unsaving a die
-        //gameManager.UpdateTurnScore();
     }
 
 

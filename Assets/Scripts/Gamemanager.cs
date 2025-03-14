@@ -17,7 +17,7 @@ public class Gamemanager : MonoBehaviour
     public Text turnScoreText, totalScoreText;
     
     public int turnScore, totalScore, turnNumber;
-    public bool hasSaved = true, hasRolled = false;
+    public bool hasSaved = true, hasRolled = false, addDice = true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -81,7 +81,7 @@ public class Gamemanager : MonoBehaviour
             return;
         }
 
-        Debug.Log("Rolling dice in PlayableDice...");
+        //Debug.Log("Rolling dice in PlayableDice...");
 
         List<int> diceValues = new List<int>();
 
@@ -93,7 +93,8 @@ public class Gamemanager : MonoBehaviour
             int randDie = Random.Range(0, diceImages.Length);
             dice.GetComponent<SpriteRenderer>().sprite = diceImages[randDie];
 
-            Debug.Log("Rolled: " + dice.name + " → Face: " + randDie);
+            // Check dice and dice vals
+            //Debug.Log("Rolled: " + dice.name + " → Face: " + randDie);
 
             int diceValue = dice.GetComponent<Dice>().GetDiceValue();
             diceValues.Add(diceValue);
@@ -105,7 +106,7 @@ public class Gamemanager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Farkle! No scoring dice.");
+            Debug.Log("Farked it! No scoring dice.");
             turnScore = 0;
             Bank();
             UpdateScoreBoard();
@@ -159,8 +160,9 @@ public class Gamemanager : MonoBehaviour
 
     public void UpdateTurnScore()
     {
-        List<int> savedDiceValues = new List<int>();
+        List<int> latestSavedDiceValues = new List<int>();
 
+<<<<<<< Updated upstream
         Transform RoundSaved = GameObject.Find("RoundSDice").transform;
 
         // Collect all saved dice values
@@ -169,56 +171,105 @@ public class Gamemanager : MonoBehaviour
             foreach (Transform dice in roundGroup)
             {
                 savedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
+=======
+        // Find the most recent SavedDice Turn# group
+        Transform roundSaved = GameObject.Find("RoundSDice").transform;
+        Transform latestGroup = null;
+        int highestTurnNumber = -1;
+
+        foreach (Transform savedGroup in roundSaved)
+        {
+            string groupName = savedGroup.name;
+            if (groupName.StartsWith("SavedDice Turn"))
+            {
+                int turnNumber = int.Parse(groupName.Replace("SavedDice Turn", ""));
+                if (turnNumber > highestTurnNumber)
+                {
+                    highestTurnNumber = turnNumber;
+                    latestGroup = savedGroup;
+                }
+>>>>>>> Stashed changes
             }
         }
 
-        // **Recalculate turnScore from scratch**
-        turnScore = CalculateDiceScore(savedDiceValues.ToArray());
+        // If we found a valid latest group, collect dice values
+        if (latestGroup != null)
+        {
+            foreach (Transform dice in latestGroup)
+            {
+                latestSavedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
+            }
+        }
+
+        // Calculate score
+        turnScore += CalculateDiceScore(latestSavedDiceValues.ToArray());
 
         UpdateScoreBoard();
         Debug.Log("Turn Score Updated: " + turnScore);
     }
 
 
+<<<<<<< Updated upstream
 
 
 
 
+=======
+>>>>>>> Stashed changes
     public int CalculateDiceScore(int[] diceValues)
     {
-        int score = 0;
-        int[] counts = new int[7]; // 1-based index, ignore index 0
+        Dictionary<int, int> diceCounts = new Dictionary<int, int>();
 
+        // Count occurrences of each dice value
         foreach (int value in diceValues)
         {
-            counts[value]++;
+            if (diceCounts.ContainsKey(value))
+                diceCounts[value]++;
+            else
+                diceCounts[value] = 1;
         }
 
-        // Check for three-of-a-kind
-        for (int i = 1; i <= 6; i++)
+        int score = 0;
+
+        foreach (var pair in diceCounts)
         {
-            if (counts[i] >= 6)
+            int diceValue = pair.Key;
+            int count = pair.Value;
+
+            if (diceValue == 1)
             {
-                score += 3000;
-            }else if (counts[i] >= 5)
+                // 1s are worth 100 each, but 3x1s are worth 1000
+                if (count >= 3)
+                {
+                    score += 1000 + (count - 3) * 100;  // Extra 1s still count as 100 each
+                }
+                else
+                {
+                    score += count * 100;
+                }
+            }
+            else if (diceValue == 5)
             {
-                score += 2000;
-            }else if (counts[i] >= 4)
+                // 5s are worth 50 each, but 3x5s are worth 500
+                if (count >= 3)
+                {
+                    score += 500 + (count - 3) * 50;  // Extra 5s still count as 50 each
+                }
+                else
+                {
+                    score += count * 50;
+                }
+            }
+            else
             {
-                score += 1000;
-            }else if (counts[i] >= 3)
-            {
-                if (i == 1) score += 1000 + (counts[i] - 3) * 100;  // Special rule for 1s
-                else score += i * 100;  // Correct multiplication for other numbers
-            }           
-            
+                // Standard triple rule (e.g., 3x2s = 200, 3x3s = 300, etc.)
+                if (count >= 3)
+                    score += diceValue * 100;
+            }
         }
-
-        if (counts[1] < 3) score += counts[1] * 100;
-        if (counts[5] < 3) score += counts[5] * 50;
-
-        Debug.Log("Score Calculated: " + score);
+        Debug.Log("Score: " + score);
         return score;
     }
+
 
 }
