@@ -162,16 +162,6 @@ public class Gamemanager : MonoBehaviour
     {
         List<int> latestSavedDiceValues = new List<int>();
 
-<<<<<<< Updated upstream
-        Transform RoundSaved = GameObject.Find("RoundSDice").transform;
-
-        // Collect all saved dice values
-        foreach (Transform roundGroup in RoundSaved)
-        {
-            foreach (Transform dice in roundGroup)
-            {
-                savedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
-=======
         // Find the most recent SavedDice Turn# group
         Transform roundSaved = GameObject.Find("RoundSDice").transform;
         Transform latestGroup = null;
@@ -188,7 +178,6 @@ public class Gamemanager : MonoBehaviour
                     highestTurnNumber = turnNumber;
                     latestGroup = savedGroup;
                 }
->>>>>>> Stashed changes
             }
         }
 
@@ -201,21 +190,14 @@ public class Gamemanager : MonoBehaviour
             }
         }
 
-        // Calculate score
-        turnScore += CalculateDiceScore(latestSavedDiceValues.ToArray());
+        // Calculate score      
+            turnScore += CalculateDiceScore(latestSavedDiceValues.ToArray());
+        
 
-        UpdateScoreBoard();
+            UpdateScoreBoard();
         Debug.Log("Turn Score Updated: " + turnScore);
     }
 
-
-<<<<<<< Updated upstream
-
-
-
-
-=======
->>>>>>> Stashed changes
     public int CalculateDiceScore(int[] diceValues)
     {
         Dictionary<int, int> diceCounts = new Dictionary<int, int>();
