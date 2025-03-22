@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 public class Gamemanager : MonoBehaviour
@@ -33,13 +34,26 @@ public class Gamemanager : MonoBehaviour
         //throwDice();
     }
 
-    void CreateNewSavedGroup()
+    public void CreateNewSavedGroup()
     {
-        turnNumber++;
-        currentSavedGroup = new GameObject("SavedDice Turn" + turnNumber);
-        currentSavedGroup.transform.SetParent(GameObject.Find("RoundSDice").transform);
-        roll.interactable = true;
+        string groupName = "SavedDice Turn" + turnNumber;
+
+        Transform existingGroup = GameObject.Find(groupName)?.transform;
+
+        if (existingGroup == null)
+        {
+            // Only create a new group if it doesn't exist
+            GameObject newGroup = new GameObject(groupName);
+            newGroup.transform.SetParent(GameObject.Find("RoundSDice").transform);
+            currentSavedGroup = newGroup;
+        }
+        else
+        {
+            // Use the existing group instead of replacing it
+            currentSavedGroup = existingGroup.gameObject;
+        }
     }
+
 
     public void throwDice()
     {
@@ -54,7 +68,7 @@ public class Gamemanager : MonoBehaviour
         // Move previous round's saved dice to the left and make them smaller
         float startX = -7; // Left side
         float startY = 3;  // Start stacking down from here
-        float yOffset = -0.5f; // Space between dice
+        float yOffset = Random.Range(0.1f,1.5f); // Space between dice
 
         int savedDiceCount = 0; // Track how many dice have been moved
 
@@ -83,7 +97,7 @@ public class Gamemanager : MonoBehaviour
 
         Debug.Log("Rolling dice in PlayableDice...");
 
-        List<int> diceValues = new List<int>();
+        List<Dice> diceObjects = new List<Dice>();
 
         foreach (Transform dice in playableDiceParent)
         {
@@ -95,11 +109,13 @@ public class Gamemanager : MonoBehaviour
 
             Debug.Log("Rolled: " + dice.name + " → Face: " + randDie);
 
-            int diceValue = dice.GetComponent<Dice>().GetDiceValue();
-            diceValues.Add(diceValue);
+            Dice diceComponent = dice.GetComponent<Dice>();
+            diceObjects.Add(diceComponent);
         }
 
-        if (CalculateDiceScore(diceValues.ToArray()) > 0)
+        Dice[] diceArray = diceObjects.ToArray();
+
+        if (CalculateDiceScore(diceArray) > 0)
         {
             Debug.Log("Scoring dice found!");
         }
@@ -137,8 +153,7 @@ public class Gamemanager : MonoBehaviour
         {
             dice.SetParent(diceParent, true);
             Dice diceScript = dice.GetComponent<Dice>();
-            diceScript.permanentlySaved = false;
-            diceScript.isSaved = false;
+            diceScript.diceStatus = Dice.status.inPlay;
             if (ogPositions.ContainsKey(dice))
             {
                 dice.localScale = new Vector3(0.3f, 0.3f, 1);
@@ -167,55 +182,73 @@ public class Gamemanager : MonoBehaviour
 
     public void UpdateTurnScore()
     {
-        List<int> savedDiceValues = new List<int>();
+        List<Dice> savedDice = new List<Dice>();
 
-        //make sure this works as intended
-        Transform RoundSaved = GameObject.Find("RoundSDice").transform.Find("SavedDice Turn" +turnNumber);
-        
-        foreach (Transform dice in RoundSaved)
+        Transform RoundSaved = GameObject.Find("RoundSDice").transform.Find("SavedDice Turn" + turnNumber);
+
+        if(RoundSaved != null)
         {
-            savedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
+            foreach(Transform dice in RoundSaved)
+            {
+                Dice diceComponent = dice.GetComponent<Dice>();
+                if(diceComponent != null)
+                {
+                    savedDice.Add(diceComponent);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No saved dice found for this turn");
         }
 
-        // **Recalculate turnScore from scratch**
-        turnScore = CalculateDiceScore(savedDiceValues.ToArray());
+        turnScore = CalculateDiceScore(savedDice.ToArray());
 
         UpdateScoreBoard();
         Debug.Log("Turn Score Updated: " + turnScore);
     }
 
-    public int CalculateDiceScore(int[] diceValues)
+    public int CalculateDiceScore(Dice[] diceArray)
     {
+        Dictionary<int, int> diceCounts = new Dictionary<int, int>();
+        foreach (Dice dice in diceArray)
+        {
+            if (dice.diceStatus == Dice.status.inPlay)
+                continue; // Ignore dice that are still in play
+
+            int value = dice.GetDiceValue();
+            if (diceCounts.ContainsKey(value))
+                diceCounts[value]++;
+            else
+                diceCounts[value] = 1;
+        }
+
         int score = 0;
-        int[] counts = new int[7]; // 1-based index, ignore index 0
 
-        foreach (int value in diceValues)
+        foreach (var pair in diceCounts)
         {
-            counts[value]++;
-        }
+            int diceValue = pair.Key;
+            int count = pair.Value;
 
-        // Check for three-of-a-kind
-        for (int i = 1; i <= 6; i++)
-        {
-            if (counts[i] >= 6)
+            if (diceValue == 1)
             {
-                score += 3000;
-            }else if (counts[i] >= 5)
+                if (count >= 3)
+                    score += 1000 + (count - 3) * 100;
+                else
+                    score += count * 100;
+            }
+            else if (diceValue == 5)
             {
-                score += 2000;
-            }else if (counts[i] >= 4)
+                if (count >= 3)
+                    score += 500 + (count - 3) * 50;
+                else
+                    score += count * 50;
+            }
+            else if (count >= 3)
             {
-                score += 1000;
-            }else if (counts[i] >= 3)
-            {
-                if (i == 1) score += 1000 + (counts[i] - 3) * 100;  // Special rule for 1s
-                else score += i * 100;  // Correct multiplication for other numbers
-            }           
-            
+                score += diceValue * 100;
+            }
         }
-
-        if (counts[1] < 3) score += counts[1] * 100;
-        if (counts[5] < 3) score += counts[5] * 50;
 
         Debug.Log("Score Calculated: " + score);
         return score;

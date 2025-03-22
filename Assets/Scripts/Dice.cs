@@ -3,15 +3,20 @@ using UnityEngine;
 
 public class Dice : MonoBehaviour
 {
-    public bool isSaved = false;  // Track if the dice is saved
-    public bool permanentlySaved = false;
+
+    public enum status
+    {
+        inPlay,
+        held,
+        saved
+    }
+    public status diceStatus = status.inPlay;
     
     private Transform RoundSDiceParent;
     private Transform playableDiceParent;
 
     void Start()
-    {
-        
+    {        
         RoundSDiceParent = GameObject.Find("RoundSDice").transform;
         playableDiceParent = GameObject.Find("PlayableDice").transform;
     }
@@ -32,22 +37,22 @@ public class Dice : MonoBehaviour
             return;
         }
 
-        if (permanentlySaved)
+        if (diceStatus == status.saved)
         {
             Debug.Log(gameObject.name + " is permanently saved and cannot be moved!");
             return;
         }
 
-        if (isSaved) // If the die is already saved, check if it can be removed
+        if (diceStatus == status.held) // If the die is already saved, check if it can be removed
         {
             if (transform.parent == gameManager.currentSavedGroup.transform) // Only unsave if it's from this turn
             {
                 transform.SetParent(playableDiceParent, true);
                 transform.position = new Vector3(transform.position.x, 0f, transform.position.z);
-                isSaved = false;
+                diceStatus = status.inPlay;
 
                 // Deduct score when die is removed
-                gameManager.turnScore -= gameManager.CalculateDiceScore(new int[] { GetDiceValue() });
+                gameManager.turnScore -= gameManager.CalculateDiceScore(new Dice[] { this });
                 gameManager.UpdateScoreBoard();
                 Debug.Log(gameObject.name + " moved back to PlayableDice");
 
@@ -65,11 +70,11 @@ public class Dice : MonoBehaviour
                 gameManager.UpdateTurnScore();
             }
         }
-        else // If the die is not saved, move it to the current round's saved dice group
+        else if(diceStatus == status.inPlay) // If the die is not saved, move it to the current round's saved dice group
         {
             transform.SetParent(gameManager.currentSavedGroup.transform, true);
             transform.position = new Vector3(transform.position.x, -4f, transform.position.z);
-            isSaved = true;
+            diceStatus = status.held;
 
             Debug.Log(gameObject.name + " moved to RoundSDice");
 
