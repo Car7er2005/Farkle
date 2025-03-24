@@ -12,6 +12,7 @@ public class Gamemanager : MonoBehaviour
     private Dictionary<Transform, Vector3> ogPositions = new Dictionary<Transform, Vector3>();
     private Transform diceParent;
     private Transform roundSavedDiceParent;
+    public List<int> turnSavedDiceValues = new List<int>();
     public GameObject currentSavedGroup;
 
     public Text turnScoreText, totalScoreText;
@@ -30,7 +31,6 @@ public class Gamemanager : MonoBehaviour
         roundSavedDiceParent = GameObject.Find("RoundSDice").transform;
 
         CreateNewSavedGroup();
-        //throwDice();
     }
 
     void CreateNewSavedGroup()
@@ -137,66 +137,43 @@ public class Gamemanager : MonoBehaviour
         {
             dice.SetParent(diceParent, true);
             Dice diceScript = dice.GetComponent<Dice>();
-            diceScript.permanentlySaved = false;
-            diceScript.isSaved = false;
+            diceScript.state = Dice.DiceState.InPlay;
             if (ogPositions.ContainsKey(dice))
             {
                 dice.localScale = new Vector3(0.3f, 0.3f, 1);
                 dice.position = ogPositions[dice];
             }
-            
-        }        
+        }
+        turnSavedDiceValues.Clear();
 
         CreateNewSavedGroup();
         UpdateScoreBoard();
         throwDice();
     }
 
+
     public void UpdateScoreBoard()
     {
         turnScoreText.text = "Turn Score: " + turnScore;
         totalScoreText.text = "Total Score: " + totalScore;
     }
-
     public void UpdateTurnScore()
     {
         List<int> latestSavedDiceValues = new List<int>();
 
-        // Find the most recent SavedDice Turn# group
-        Transform roundSaved = GameObject.Find("RoundSDice").transform;
-        Transform latestGroup = null;
-        int highestTurnNumber = -1;
-
-        foreach (Transform savedGroup in roundSaved)
+        // Collect dice values from the current saved group
+        foreach (Transform dice in currentSavedGroup.transform)
         {
-            string groupName = savedGroup.name;
-            if (groupName.StartsWith("SavedDice Turn"))
-            {
-                int turnNumber = int.Parse(groupName.Replace("SavedDice Turn", ""));
-                if (turnNumber > highestTurnNumber)
-                {
-                    highestTurnNumber = turnNumber;
-                    latestGroup = savedGroup;
-                }
-            }
+            latestSavedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
         }
 
-        // If we found a valid latest group, collect dice values
-        if (latestGroup != null)
-        {
-            foreach (Transform dice in latestGroup)
-            {
-                latestSavedDiceValues.Add(dice.GetComponent<Dice>().GetDiceValue());
-            }
-        }
+        // Recalculate the turn score from scratch based on the current turn saved dice values
+        turnScore = CalculateDiceScore(latestSavedDiceValues.ToArray());
 
-        // Calculate score      
-            turnScore += CalculateDiceScore(latestSavedDiceValues.ToArray());
-        
-
-            UpdateScoreBoard();
+        UpdateScoreBoard();
         Debug.Log("Turn Score Updated: " + turnScore);
     }
+
 
     public int CalculateDiceScore(int[] diceValues)
     {
