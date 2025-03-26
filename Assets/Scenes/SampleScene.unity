@@ -708,6 +708,7 @@ RectTransform:
   - {fileID: 241698464}
   - {fileID: 205129907}
   - {fileID: 951727133}
+  - {fileID: 1348786820}
   - {fileID: 1525714330}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1038,8 +1039,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcb6b45328208ba48838390bf9297bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSaved: 0
-  permanentlySaved: 0
+  state: 0
 --- !u!61 &735858982
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1209,14 +1209,18 @@ MonoBehaviour:
   - {fileID: 1877557355}
   - {fileID: 1698521662}
   roll: {fileID: 1167362081}
+  turnSavedDiceValues: 
   currentSavedGroup: {fileID: 0}
   turnScoreText: {fileID: 951727134}
+  roundScoreText: {fileID: 1348786821}
   totalScoreText: {fileID: 1525714331}
   turnScore: 0
+  roundScore: 0
   totalScore: 0
   turnNumber: 0
   hasSaved: 1
   hasRolled: 0
+  addDice: 1
 --- !u!4 &1064063002
 Transform:
   m_ObjectHideFlags: 0
@@ -1364,6 +1368,85 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1167362079}
+  m_CullTransparentMesh: 1
+--- !u!1 &1348786819
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1348786820}
+  - component: {fileID: 1348786822}
+  - component: {fileID: 1348786821}
+  m_Layer: 5
+  m_Name: RoundScoreText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1348786820
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1348786819}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 453636563}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 681.31, y: 123.1}
+  m_SizeDelta: {x: 450, y: 75}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1348786821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1348786819}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 12800000, guid: 4beb055f07aaff244873dec698d0363e, type: 3}
+    m_FontSize: 45
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 210
+    m_Alignment: 0
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 'Round Score: 0'
+--- !u!222 &1348786822
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1348786819}
   m_CullTransparentMesh: 1
 --- !u!1 &1438693421
 GameObject:
@@ -1709,8 +1792,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcb6b45328208ba48838390bf9297bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSaved: 0
-  permanentlySaved: 0
+  state: 0
 --- !u!61 &1698521664
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1937,8 +2019,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcb6b45328208ba48838390bf9297bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSaved: 0
-  permanentlySaved: 0
+  state: 0
 --- !u!61 &1723021119
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2165,8 +2246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcb6b45328208ba48838390bf9297bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSaved: 0
-  permanentlySaved: 0
+  state: 0
 --- !u!61 &1877557357
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2314,8 +2394,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcb6b45328208ba48838390bf9297bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSaved: 0
-  permanentlySaved: 0
+  state: 0
 --- !u!61 &2012316365
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2463,8 +2542,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcb6b45328208ba48838390bf9297bd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSaved: 0
-  permanentlySaved: 0
+  state: 0
 --- !u!61 &2035491681
 BoxCollider2D:
   m_ObjectHideFlags: 0
