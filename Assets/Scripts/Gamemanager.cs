@@ -16,7 +16,7 @@ public class Gamemanager : MonoBehaviour
     public List<int> turnSavedDiceValues = new List<int>();
     public GameObject currentSavedGroup;
 
-    public Text turnScoreText, roundScoreText, totalScoreText;
+    public Text turnScoreText, roundScoreText, totalScoreText, popUpText;
     
     public int turnScore, roundScore, totalScore, turnNumber;
     public bool hasSaved = true, hasRolled = false, addDice = true;
@@ -30,6 +30,7 @@ public class Gamemanager : MonoBehaviour
             ogPositions[dice] = dice.position; // Store original position
         }
         roundSavedDiceParent = GameObject.Find("RoundSDice").transform;
+        popUpText.gameObject.SetActive(false);
 
         CreateNewSavedGroup();
     }
@@ -46,14 +47,14 @@ public class Gamemanager : MonoBehaviour
     {
         if (!hasSaved && hasRolled)
         {
-            Debug.Log("You must save at least one die before rolling!");
+            popUpText.text = "You must save at least one die before rolling!";
             return;
         }
 
         // Allow rolling without saving any dice in the first round
         if (turnNumber > 1 && HasNonScoringDice())
         {
-            Debug.Log("Cannot roll because there is a non-scoring die selected.");
+            popUpText.text = "Cannot roll because there is a non-scoring die selected.";
             roll.interactable = false;
             return;
         }
@@ -109,14 +110,17 @@ public class Gamemanager : MonoBehaviour
         if (CalculateDiceScore(diceValues.ToArray()) > 0)
         {
             Debug.Log("Scoring dice found!");
+            popUpText.gameObject.SetActive(false);
         }
         else
         {
             Debug.Log("Farked it! No scoring dice.");
+            popUpText.text = "Farked It!";
             turnScore = 0;
             roundScore = 0;
             Bank();
             UpdateScoreBoard();
+            popUpText.gameObject.SetActive(true);
         }
 
         hasSaved = false; // Reset so a die must be saved before rolling again        
@@ -127,6 +131,7 @@ public class Gamemanager : MonoBehaviour
         totalScore += roundScore + turnScore;
         roundScore = 0;
         turnScore = 0;
+        turnNumber = 0;
 
         List<Transform> diceToMove = new List<Transform>();
 
@@ -216,56 +221,63 @@ public class Gamemanager : MonoBehaviour
         }
 
         int score = 0;
-
-        foreach (var pair in diceCounts)
-        {
-            int diceValue = pair.Key;
-            int count = pair.Value;
-
-            if (diceValue == 1)
-            {
-                // 1s are worth 100 each, but 3x1s are worth 1000
-                if (count >= 3)
-                {
-                    score += 1000 + (count - 3) * 100;  // Extra 1s still count as 100 each
-                }
-                else
-                {
-                    score += count * 100;
-                }
-            }
-            else if (diceValue == 5)
-            {
-                // 5s are worth 50 each, but 3x5s are worth 500
-                if (count >= 3)
-                {
-                    score += 500 + (count - 3) * 50;  // Extra 5s still count as 50 each
-                }
-                else
-                {
-                    score += count * 50;
-                }
-            }
-            else
-            {
-                // Standard triple rule (e.g., 3x2s = 200, 3x3s = 300, etc.)
-                if (count >= 3)
-                    score += diceValue * 100;
-            }
-        }
+        bool isStraight = false;
 
         // Check for straight (1-5, 2-6, 1-6)
         if (diceCounts.Count == 5 && diceCounts.ContainsKey(1) && diceCounts.ContainsKey(2) && diceCounts.ContainsKey(3) && diceCounts.ContainsKey(4) && diceCounts.ContainsKey(5))
         {
             score += 1500; // 1-5 straight
+            isStraight = true;
         }
         else if (diceCounts.Count == 5 && diceCounts.ContainsKey(2) && diceCounts.ContainsKey(3) && diceCounts.ContainsKey(4) && diceCounts.ContainsKey(5) && diceCounts.ContainsKey(6))
         {
             score += 1500; // 2-6 straight
+            isStraight = true;
         }
         else if (diceCounts.Count == 6 && diceCounts.ContainsKey(1) && diceCounts.ContainsKey(2) && diceCounts.ContainsKey(3) && diceCounts.ContainsKey(4) && diceCounts.ContainsKey(5) && diceCounts.ContainsKey(6))
         {
             score += 2000; // 1-6 straight
+            isStraight = true;
+        }
+
+        if (!isStraight)
+        {
+            foreach (var pair in diceCounts)
+            {
+                int diceValue = pair.Key;
+                int count = pair.Value;
+
+                if (diceValue == 1)
+                {
+                    // 1s are worth 100 each, but 3x1s are worth 1000
+                    if (count >= 3)
+                    {
+                        score += 1000 + (count - 3) * 100;  // Extra 1s still count as 100 each
+                    }
+                    else
+                    {
+                        score += count * 100;
+                    }
+                }
+                else if (diceValue == 5)
+                {
+                    // 5s are worth 50 each, but 3x5s are worth 500
+                    if (count >= 3)
+                    {
+                        score += 500 + (count - 3) * 50;  // Extra 5s still count as 50 each
+                    }
+                    else
+                    {
+                        score += count * 50;
+                    }
+                }
+                else
+                {
+                    // Standard triple rule (e.g., 3x2s = 200, 3x3s = 300, etc.)
+                    if (count >= 3)
+                        score += diceValue * 100;
+                }
+            }
         }
 
         // Check for three pairs
@@ -283,4 +295,5 @@ public class Gamemanager : MonoBehaviour
         Debug.Log("Score: " + score);
         return score;
     }
+
 }
